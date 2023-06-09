@@ -4,6 +4,7 @@ import net.qiqb.execution.spring.beans.CommandAnnotationPostProcessor;
 import net.qiqb.execution.spring.beans.DomainAnnotationPostProcessor;
 import net.qiqb.execution.spring.ExecutionSpringInitializer;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
@@ -28,27 +29,46 @@ public class ExecutionComponentScanRegistrar implements ImportBeanDefinitionRegi
         registerCommandAnnotationPostProcessor(packagesToScan, registry);
         registerDomainAnnotationPostProcessor(packagesToScan, registry);
         ExecutionSpringInitializer.initialize(registry);
-
-
     }
 
-    private void registerCommandAnnotationPostProcessor(Set<String> packagesToScan, BeanDefinitionRegistry registry) {
+    private final String commandAnnotationPostProcessorBeanName = "commandAnnotationPostProcessor";
 
+    private final String domainAnnotationPostProcessorBeanName = "domainAnnotationPostProcessor";
+
+    private void registerCommandAnnotationPostProcessor(Set<String> packagesToScan, BeanDefinitionRegistry registry) {
+        if (registry.containsBeanDefinition(commandAnnotationPostProcessorBeanName)){
+            final BeanDefinition beanDefinition = registry.getBeanDefinition(commandAnnotationPostProcessorBeanName);
+            final ConstructorArgumentValues constructorArgumentValues = beanDefinition.getConstructorArgumentValues();
+            final ConstructorArgumentValues.ValueHolder argumentValue = constructorArgumentValues.getArgumentValue(0, Set.class);
+            final Set<String> value = (Set<String>) argumentValue.getValue();
+            value.addAll(packagesToScan);
+            return;
+        }
         BeanDefinitionBuilder builder = rootBeanDefinition(CommandAnnotationPostProcessor.class);
         builder.addConstructorArgValue(packagesToScan);
         builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
         AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
-        BeanDefinitionReaderUtils.registerWithGeneratedName(beanDefinition, registry);
+
+        registry.registerBeanDefinition(commandAnnotationPostProcessorBeanName,beanDefinition);
+
 
     }
 
     private void registerDomainAnnotationPostProcessor(Set<String> packagesToScan, BeanDefinitionRegistry registry) {
-
+        if (registry.containsBeanDefinition(domainAnnotationPostProcessorBeanName)){
+            final BeanDefinition beanDefinition = registry.getBeanDefinition(domainAnnotationPostProcessorBeanName);
+            final ConstructorArgumentValues constructorArgumentValues = beanDefinition.getConstructorArgumentValues();
+            final ConstructorArgumentValues.ValueHolder argumentValue = constructorArgumentValues.getArgumentValue(0, Set.class);
+            final Set<String> value = (Set<String>) argumentValue.getValue();
+            value.addAll(packagesToScan);
+            return;
+        }
         BeanDefinitionBuilder builder = rootBeanDefinition(DomainAnnotationPostProcessor.class);
         builder.addConstructorArgValue(packagesToScan);
         builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
         AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
-        BeanDefinitionReaderUtils.registerWithGeneratedName(beanDefinition, registry);
+        registry.registerBeanDefinition(domainAnnotationPostProcessorBeanName,beanDefinition);
+
 
     }
 

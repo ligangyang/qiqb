@@ -1,4 +1,4 @@
-package net.qiqb.domain.event;
+package net.qiqb.domain.event.domain.types;
 
 public enum DomainEventStatus {
     // 待分发

@@ -1,7 +1,11 @@
-package net.qiqb.domain.event;
+package net.qiqb.domain.event.domain;
 
-import net.qiqb.domain.config.support.EntityIdGeneratorHolder;
 import lombok.Getter;
+import net.qiqb.domain.config.annotation.AggretateRoot;
+import net.qiqb.domain.config.annotation.EntityId;
+import net.qiqb.domain.config.support.EntityIdGeneratorHolder;
+import net.qiqb.domain.event.domain.types.DomainEventStatus;
+import net.qiqb.domain.event.domain.types.EventProducer;
 
 import java.time.LocalDateTime;
 import java.util.EventObject;
@@ -10,14 +14,16 @@ import java.util.EventObject;
  * 域事件
  * 领域事件
  *
- * @author WangYun
+ * @author fz51
  * @date 2023/02/20
  */
+@AggretateRoot
 public class DomainEvent extends EventObject {
 
     /**
      * 事件id
      */
+    @EntityId
     @Getter
     private String id;
 
@@ -34,16 +40,17 @@ public class DomainEvent extends EventObject {
     private LocalDateTime timestamp = LocalDateTime.now();
 
     @Getter
-    private final DomainEventCreator creator;
+    private final EventProducer creator;
     @Getter
     private DomainEventStatus status;
+
     @Getter
     private final Object content;
 
-    public DomainEvent(Object resource, DomainEventCreator creator, Object content) {
+    public DomainEvent(Object resource, EventProducer creator, Object content) {
         super(resource);
         // 默认采用雪花id
-        this.id = EntityIdGeneratorHolder.getEntityIdGenerator(Long.class).generate().toString();
+        this.id = EntityIdGeneratorHolder.get(Long.class).generate().toString();
         this.creator = creator;
         this.status = DomainEventStatus.PRE_SEND;
         this.content = content;

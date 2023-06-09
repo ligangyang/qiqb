@@ -1,4 +1,4 @@
-package net.qiqb.domain.event;
+package net.qiqb.domain.event.infrastructure.dao;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -6,10 +6,11 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import net.qiqb.domain.event.domain.types.DomainEventStatus;
 
 import java.time.LocalDateTime;
 
-@Table(name = "zeus_domain_event")
+@Table(name = "qiqb_domain_event")
 @Data
 @Entity
 @Builder

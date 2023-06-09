@@ -29,6 +29,8 @@ public class DomainPersistenceHandler implements HandlerAdapter {
                 //
             }
             ((DomainPersistence<Object>) handler).persisted(new PersistenceWrapper<>(left, domain));
+            // 领域事件持久话
+
         }
     }
 }

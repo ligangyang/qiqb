@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 单表
+ * 单表变化
  *
  * @param <T>
  */

@@ -10,7 +10,7 @@ public class PersistenceWrapper<D> {
     private final D initObject;
 
     /**
-     * 业务执行后得到的对象
+     * 业务执行后得到的领域对象
      */
     private final D completedBusinessObject;
 
@@ -43,6 +43,6 @@ public class PersistenceWrapper<D> {
 
     public boolean hasChange() {
         //return !diff.getChanges().isEmpty();
-        return false;
+        return true;
     }
 }

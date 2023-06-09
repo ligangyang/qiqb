@@ -1,15 +1,19 @@
 package net.qiqb.execution.executor.support;
 
+import lombok.extern.slf4j.Slf4j;
 import net.qiqb.execution.common.step.StepProcessorChain;
 import net.qiqb.execution.config.DomainType;
 import net.qiqb.execution.executor.CommandWrapper;
+import net.qiqb.execution.executor.config.DomainPersistence;
 import net.qiqb.execution.executor.support.handler.HandlerManager;
 import net.qiqb.execution.executor.support.handler.TypeHandlerChain;
-import net.qiqb.execution.executor.config.DomainPersistence;
-import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 领域对象持久
+ */
 @Slf4j
 public class PersistenceDomainStepProcessor extends AbsStepProcessor {
+
 
     @Override
     public boolean isSkip(CommandWrapper command) {
@@ -20,7 +24,8 @@ public class PersistenceDomainStepProcessor extends AbsStepProcessor {
 
     @Override
     public void doProcess(CommandWrapper command, StepProcessorChain chain) {
-        log.info("命令领域持久化：{}", command.getCommandDefinition().getDefinitionName());
+        // 开始事物
+
         final HandlerManager handlerManager = getHandlerManager();
         final TypeHandlerChain handlerChain = handlerManager.getHandler(command, DomainPersistence.class);
         if (handlerChain != null) {
@@ -30,6 +35,7 @@ public class PersistenceDomainStepProcessor extends AbsStepProcessor {
             Object handler = handlerChain.getHandlers()[0];
             handlerManager.getHandlerAdapter(handler).handle(command, handler);
         }
+        // 结束事物
         chain.doProcess(command);
     }
 

@@ -1,9 +1,9 @@
 package net.qiqb.execution.spring.beans;
 
 import cn.hutool.core.util.ClassLoaderUtil;
-import net.qiqb.execution.executor.config.BusinessExecutor;
 import net.qiqb.execution.config.support.named.GenericNamedFinder;
 import net.qiqb.execution.config.support.named.GenericNamedFinderHolder;
+import net.qiqb.execution.executor.config.BusinessExecutor;
 import net.qiqb.execution.executor.config.DomainObjectFactory;
 import net.qiqb.execution.executor.config.DomainPersistence;
 import org.springframework.beans.BeansException;
@@ -215,24 +215,63 @@ public class SpringGenericNamedFinderBean implements GenericNamedFinder, Applica
         return null;
     }
 
-    private Class getResolvableType(ResolvableType resolvableType, Class<?> type, int index) {
+    /**
+     * 获取某个接口的泛型信息，如果接口没有，则
+     *
+     * @param resolvableType
+     * @param type
+     * @return
+     */
+    private ResolvableType[] findResolvableType(ResolvableType resolvableType, Class<?> type) {
+
+        List<ResolvableType> result = new ArrayList<>();
+        if (resolvableType != null && ResolvableType.NONE != resolvableType) {
+            // 所有接口
+            final ResolvableType[] interfaces = resolvableType.getInterfaces();
+            for (ResolvableType anInterface : resolvableType.getInterfaces()) {
+                // 接口上定义接口
+                final ResolvableType[] superResolvableType = anInterface.getInterfaces();
+
+                if (type.equals(anInterface.getRawClass())) {
+
+                }
+            }
+            final ResolvableType superType = resolvableType.getSuperType();
+            if (superType != ResolvableType.NONE) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    private Class<?> getResolvableType(ResolvableType resolvableType, Class<?> type, int index) {
         if (resolvableType == null || ResolvableType.NONE == resolvableType) {
             return null;
         }
-        final ResolvableType[] interfaces = resolvableType.getInterfaces();
-        for (ResolvableType anInterface : interfaces) {
-            if (type.equals(anInterface.getRawClass())) {
-                final ResolvableType[] generics = anInterface.getGenerics();
-                if (generics.length > index) {
-                    return generics[index].resolve();
-                }
+        if (type.equals(resolvableType.getRawClass())) {
+            final ResolvableType[] generics = resolvableType.getGenerics();
+            if (generics.length > index) {
+                return generics[index].resolve();
             }
         }
-        final ResolvableType superType = resolvableType.getSuperType();
-        if (superType != ResolvableType.NONE) {
-            return getResolvableType(superType, type, index);
+        // 接口类型
+        for (ResolvableType anInterface : resolvableType.getInterfaces()) {
+            // 接口上定义接口
+            for (ResolvableType superResType : anInterface.getInterfaces()) {
+                Class<?> result = getResolvableType(superResType, type, index);
+                if (result != null) {
+                    return result;
+                }
+            }
+            //
+            Class<?> result = getResolvableType(anInterface, type, index);
+            if (result != null) {
+                return result;
+            }
         }
-        return null;
+        // 父类
+        return getResolvableType(resolvableType.getSuperType(), type, index);
     }
 
     @Override

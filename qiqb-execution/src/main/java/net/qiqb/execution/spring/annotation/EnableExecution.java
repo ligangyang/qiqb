@@ -8,7 +8,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@EnableExecutionConfig
 @ExecutionComponentScan
 public @interface EnableExecution {
 

@@ -14,10 +14,8 @@ public class ExecutingContext {
     @Getter
     private CommandWrapper command;
 
-    private CommandGroup commandGroup;
-
     public void clear() {
-
+        this.command = null;
     }
 
     public static synchronized ExecutingContext get() {

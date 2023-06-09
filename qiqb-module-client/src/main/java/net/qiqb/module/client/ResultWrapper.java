@@ -1,4 +1,4 @@
-package net.qiqb.core.beans;
+package net.qiqb.module.client;
 
 import java.io.Serializable;
 import java.util.Collection;

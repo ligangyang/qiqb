@@ -4,6 +4,7 @@ import cn.hutool.core.annotation.AnnotationUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
 import net.qiqb.domain.config.annotation.BusinessIdMapping;
 import net.qiqb.domain.persistence.config.AggregateRootLoader;
 import net.qiqb.domain.persistence.config.LoadVoucher;
@@ -19,8 +20,8 @@ import java.util.List;
 
 /**
  * 在领域初始化步骤中，如果命令没有获取到相应到 DomainObjectFactory 。尝试通过 AggregateRootLoader 加载。
- *
  */
+@Slf4j
 public class DomainObjectLoaderHandlerMapping extends AbsTypeHandlerMapping<AggregateRootLoader> {
 
 
@@ -37,7 +38,12 @@ public class DomainObjectLoaderHandlerMapping extends AbsTypeHandlerMapping<Aggr
         String decorateDomainName;
         final DomainMapping domainMapping = GenericNamedFinderHolder.getMappingAnnotation(handler, DomainMapping.class);
         if (domainMapping == null) {
-            decorateDomainName = GenericNamedFinderHolder.findGeneric(handler,AggregateRootLoader.class, 1).getName();
+            final Class<?> generic = GenericNamedFinderHolder.findGeneric(handler, AggregateRootLoader.class, 1);
+            if (generic == null) {
+                log.warn("{}对象找不到对应AggregateRootLoader泛型", handler);
+                return null;
+            }
+            decorateDomainName = generic.getName();
         } else {
             decorateDomainName = domainMapping.value();
         }
