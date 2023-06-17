@@ -1,33 +1,32 @@
 package net.qiqb.domain.persistence;
 
+import lombok.extern.slf4j.Slf4j;
 import net.qiqb.domain.utils.AggregateRootUtils;
 import net.qiqb.execution.example.DeleteDomainHolder;
 import net.qiqb.execution.executor.config.DomainPersistence;
 import net.qiqb.execution.executor.config.PersistenceWrapper;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
 
 /**
  * 抽象的领域持久化对象
  *
- * @param <AR>
+ * @param <D>
  */
 @Slf4j
-public abstract class AbstractDomainPersistence<AR> implements DomainPersistence<AR> {
+public abstract class AbstractDomainPersistence<D> implements DomainPersistence<D> {
     /**
-     * 不管聚合根是否跟新，都执行新增操作。
-     * 适用于当前聚合根需要更新实时时间（更新人）或者版本号
+     * 领域持久化
+     *
+     * @param domainObject 待持久化待聚合根对象
      */
-    private boolean updateWhenNonChange = false;
-
     @Override
-    public void persisted(PersistenceWrapper<AR> ar) {
-        AR aggregateRoot = ar.get();
+    public void persisted(PersistenceWrapper<D> domainObject) {
+        D aggregateRoot = domainObject.get();
         final Object id = getId(aggregateRoot);
         if (DeleteDomainHolder.isDelete(aggregateRoot)) {
             try {
-                doRemove(ar);
+                doRemove(domainObject);
             } finally {
                 DeleteDomainHolder.deleted(aggregateRoot);
             }
@@ -35,44 +34,45 @@ public abstract class AbstractDomainPersistence<AR> implements DomainPersistence
         }
         if (PersistenceHelper.nonCommit(id)) {
             try {
-                doAdd(ar);
+                doAdd(domainObject);
             } finally {
                 PersistenceHelper.commit(id);
             }
             return;
         }
-        //
-        if (updateWhenNonChange) {
-            doModify(ar);
-        } else {
-            // 判断是否有改变
-            if (ar.hasChange()) {
-                doModify(ar);
-            }
-        }
+        // 更新
+        doModify(domainObject);
     }
 
-    protected Object getId(AR ar) {
+    protected Object getId(D domainObject) {
         // 获取领域对象的id
-        final Optional<Object> id = AggregateRootUtils.lookupAggregateRootId(ar);
+        final Optional<Object> id = AggregateRootUtils.lookupAggregateRootId(domainObject);
         if (id.isPresent()) {
             return id.get();
         }
-        log.error("找不到聚合根ID:{}", ar.getClass());
+        log.error("找不到聚合根ID:{}", domainObject.getClass());
         throw new IllegalStateException("找不到聚合根ID");
     }
 
-    protected abstract void doAdd(PersistenceWrapper<AR> ar);
+    /**
+     * 执行聚合根新增操作
+     *
+     * @param domainObject 待新增的领域聚合根对象
+     */
+    protected abstract void doAdd(PersistenceWrapper<D> domainObject);
 
-    protected abstract void doModify(PersistenceWrapper<AR> ar);
+    /**
+     * 根据聚合根执行领域对象更新操作
+     *
+     * @param domainObject 待更新的领域聚合根对象
+     */
+    protected abstract void doModify(PersistenceWrapper<D> domainObject);
 
-    protected abstract void doRemove(PersistenceWrapper<AR> ar);
+    /**
+     * 根据聚合根执行领域对象删除操作
+     *
+     * @param domainObject 待新增的领域聚合根对象
+     */
+    protected abstract void doRemove(PersistenceWrapper<D> domainObject);
 
-    protected boolean isUpdateWhenNonChange() {
-        return updateWhenNonChange;
-    }
-
-    public void setUpdateWhenNonChange(boolean updateWhenNonChange) {
-        this.updateWhenNonChange = updateWhenNonChange;
-    }
 }

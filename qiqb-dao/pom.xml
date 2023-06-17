@@ -20,6 +20,11 @@
     <dependencies>
         <dependency>
             <groupId>net.qiqb</groupId>
+            <artifactId>qiqb-core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>net.qiqb</groupId>
             <artifactId>qiqb-auth</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>

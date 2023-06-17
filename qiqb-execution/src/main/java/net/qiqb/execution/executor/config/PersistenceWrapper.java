@@ -1,48 +1,37 @@
 package net.qiqb.execution.executor.config;
 
-import cn.hutool.core.lang.func.Func1;
-import cn.hutool.core.lang.func.LambdaUtil;
-
 public class PersistenceWrapper<D> {
     /**
      * 初始化后得到的数据
      */
-    private final D initObject;
+    private final D initDomainObject;
 
     /**
      * 业务执行后得到的领域对象
      */
-    private final D completedBusinessObject;
+    private final D completedDomainObject;
 
 
-    public PersistenceWrapper(D initObject, D completedBusinessObject) {
-        this.initObject = initObject;
-        this.completedBusinessObject = completedBusinessObject;
+    public PersistenceWrapper(D initDomainObject, D completedDomainObject) {
+        this.initDomainObject = initDomainObject;
+        this.completedDomainObject = completedDomainObject;
     }
-
-    public D get() {
-        return completedBusinessObject;
-    }
-
-
 
     /**
-     * 判断是否有改变
+     * 获取当前的领域对象
      *
-     * @param function
-     * @param <P>
-     * @param <R>
      * @return
      */
-    public <P, R> boolean hasChange(Func1<P, R> function) {
-        final String fieldName = LambdaUtil.getFieldName(function);
-        //final List<PropertyChange> propertyChanges = diff.getChanges().getPropertyChanges(fieldName);
-        //return !propertyChanges.isEmpty();
-        return false;
+    public D get() {
+        return completedDomainObject;
     }
 
-    public boolean hasChange() {
-        //return !diff.getChanges().isEmpty();
-        return true;
+    /**
+     * 获取初始化领域对象
+     *
+     * @return
+     */
+    public D getInit() {
+        return initDomainObject;
     }
 }

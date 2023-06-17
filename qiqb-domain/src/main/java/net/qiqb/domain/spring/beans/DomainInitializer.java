@@ -9,6 +9,7 @@ import net.bytebuddy.matcher.ElementMatchers;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.io.Serializable;
 import java.lang.instrument.Instrumentation;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
@@ -24,10 +25,15 @@ public class DomainInitializer implements ApplicationContextInitializer<Configur
         new AgentBuilder.Default()
                 .type(ElementMatchers.isSubTypeOf(EntityIdGenerator.class))
                 .transform((builder, typeDescription, classLoader, module, protectionDomain) -> {
-                    return builder.method(named("generate")).intercept(MethodDelegation.to(EntityIdGeneratorAdvisor.class));
+                    return builder
+                            // 默认添加
+                            .implement(Serializable.class)
+                            .method(named("generate"))
+                            .intercept(MethodDelegation.to(EntityIdGeneratorAdvisor.class));
 
                 })
                 .installOn(install);
+
 
     }
 }

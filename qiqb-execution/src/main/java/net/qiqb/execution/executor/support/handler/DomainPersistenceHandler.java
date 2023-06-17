@@ -1,10 +1,10 @@
 package net.qiqb.execution.executor.support.handler;
 
-import net.qiqb.execution.executor.config.PersistenceWrapper;
-import net.qiqb.execution.executor.config.DomainPersistence;
 import net.qiqb.execution.executor.CommandWrapper;
 import net.qiqb.execution.executor.DomainValueSnapshot;
 import net.qiqb.execution.executor.DomainWrapper;
+import net.qiqb.execution.executor.config.DomainPersistence;
+import net.qiqb.execution.executor.config.PersistenceWrapper;
 
 import java.util.Optional;
 
@@ -20,10 +20,11 @@ public class DomainPersistenceHandler implements HandlerAdapter {
         if (handler instanceof DomainPersistence) {
             Object left = null;
             Object domain = command.getDomain();
-            if (domain instanceof DomainWrapper) {
-                final Optional<DomainValueSnapshot> initDomain = ((DomainWrapper) domain).getDomainValueSnapshot(command).stream().filter(i -> i.getPoint().equals(DomainValueSnapshot.INIT_POINT)).findFirst();
+            if (domain != null) {
+                final Optional<DomainValueSnapshot> initDomain = ((DomainWrapper) domain).getDomainValueSnapshot(command)
+                        .stream().filter(i -> i.getPoint().equals(DomainValueSnapshot.INIT_POINT)).findFirst();
                 if (initDomain.isPresent()) {
-                    left = initDomain.get();
+                    left = initDomain.get().getValue();
                 }
                 domain = ((DomainWrapper) domain).getObject();
                 //
